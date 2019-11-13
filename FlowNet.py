@@ -155,6 +155,7 @@ class Host():
             self.find_in_response(flow)
 
     def find_in_request(self,flow):
+        assert(flow.ip_src==self.ip)
         if flow.ip_dst in self.requests_made_map:
             flows_bw_hostpair = self.requests_made_map[flow.ip_dst]
             if(flow.dns_id in flows_bw_hostpair):
@@ -162,8 +163,9 @@ class Host():
         return None
 
     def find_in_response(self,flow):
+        assert(flow.ip_dst==self.ip)
         if flow.ip_src in self.responses_given_map:
-            flows_bw_hostpair = self.responses_given_map[flow.ip_dst]
+            flows_bw_hostpair = self.responses_given_map[flow.ip_src]
             if(flow.dns_id in flows_bw_hostpair):
                 return flows_bw_hostpair[flow.dns_id]
         return None
@@ -175,8 +177,8 @@ class Host():
 
     def add_in_response(self,flow,dns_node):
         if(flow.ip_src not in self.responses_given_map):
-            self.requests_made_map[flow.ip_src]={}
-        self.requests_made_map[flow.ip_src][flow.dns_id]=dns_node
+            self.responses_given_map[flow.ip_src]={}
+        self.responses_given_map[flow.ip_src][flow.dns_id]=dns_node
 
     def __hash__(self):
         return self.ip
