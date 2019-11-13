@@ -1,0 +1,140 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Tree Viewer</title>
+</head>
+
+<link rel="stylesheet" href="./static/js/Treant.css" type="text/css"/>
+<link rel="stylesheet" href="static/visualize.css" type="text/css"/>
+<script src="static/js/vendor/raphael.js"></script>
+<script src="static/js/Treant.js"></script>
+<script>
+    function makeRequest(method, url) {
+        return new Promise(function (resolve, reject) {
+            let xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(xhr.response);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
+        });
+    }
+    async function visualize(){
+            tree_data = JSON.parse(await makeRequest("GET", "/api/flownetdata/", true));
+            console.log(tree_data)
+            my_chart_props = {
+                container: "#tree-simple",
+                animateOnInit: true,
+                
+                node: {
+                    collapsable: true,
+                },
+                animation: {
+                    nodeAnimation: "easeOutBounce",
+                    nodeSpeed: 700,
+                    connectorsAnimation: "bounce",
+                    connectorsSpeed: 700
+                },
+                rootOrientation: "WEST",
+                nodeAlign: "BOTTOM"
+            }
+            tree_data.chart = my_chart_props;
+            var my_chart = new Treant(tree_data);
+    }
+    function collapse(obj){
+        if(obj.children==null || obj.children.length==0){
+            obj.collapsed=true;
+            return obj;
+        }
+        for(let i=0;i<obj.children.length;i++){
+            obj.children[i]=collapse(obj.children[i]);
+        }
+        obj.collapsed=true;
+        return obj
+    }
+    function collapseall(){
+        tree_data.nodeStructure=collapse(tree_data.nodeStructure);
+        my_chart = new Treant(tree_data);
+    }
+
+    function expand(obj){
+        if(obj==undefined || obj==null || obj.children==null || obj.children.length==0){
+            obj.collapsed=false;
+            return obj;
+        }
+        for(let i=0;i<obj.children.length;i++){
+            obj.children[i]=expand(obj.children[i]);
+        }
+        obj.collapsed=false
+        return obj;
+    }
+    function expandall(){
+        tree_data.nodeStructure=expand(tree_data.nodeStructure);
+        my_chart = new Treant(tree_data);
+    }
+    async function clearFlowNet(){
+        await makeRequest("GET", "/api/clear/");
+        await visualize();
+    }
+    function toggleRefresh(event){
+        clearInterval(this.my_interval);
+        if(event.target.checked){
+            console.log("setting true")
+            this.my_interval=setInterval(visualize,{{timeout}});
+        }
+    }
+</script>
+<body onload="visualize()">
+    <span class="top-right">
+        <table>
+            <tr>
+                <td>Guide</td>
+                <td><span class="dns">DNS node</span></td>
+                <td><span class="ip">IP node</span></td>
+                <td><span class="mac">MAC node</span></td>
+            </tr>
+        <table>
+    </span>
+
+    <table>
+        <tr>
+            <td><button onclick="collapseall()">Collapse All</button></td>
+            <td><button onclick="expandall()">Expand All</button></td>
+            <td><button onclick="clearFlowNet()">Clear FlowNet</button></td>
+            <td><button onclick="visualize()">Refresh</button></td>
+        </tr>
+        <tr>
+            <!-- Rounded switch -->
+            <td>
+                auto-refresh
+            </td>
+            <td>
+                <label class="switch">
+                    <input type="checkbox" id="auto-refresh" onChange="toggleRefresh(event)"> 
+                    <span class="slider round"></span>
+                </label>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+        </tr>
+    </table>
+    <div id="tree-simple"></div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+    "ip_src":"",
+    "ip_dst":"",
+    "src_mac":"",
+    "dst_mac":"",
+    "type":"request/response",
+    "id":""
+}

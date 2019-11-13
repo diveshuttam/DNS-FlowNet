@@ -1,0 +1,78 @@
+<html>
+    <body>
+    <form action="/api/new/" method="post">
+        <table>
+            <tr>
+                <td>
+                    DNS Headers
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    dns request type
+                </td>
+                <td>
+                    <select type="text" name="dns_type"> 
+                        <option value="request">Request</option>
+                        <option value="response">Response</option>
+                    </select>
+                </td>
+                <td>
+                    dns request id 
+                </td>
+                <td>
+                    <input type="text" name="dns_id" value="1">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    IP Headers
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    ip_src
+                </td>
+                <td>
+                    <input type="text" name="ip_src" value="10.0.0.1">
+                </td>
+                <td>
+                    ip_dst 
+                </td>
+                <td>
+                    <input type="text" name="ip_dst" value="10.0.0.2">
+                </td>
+                <td>
+                    new_packet
+                </td>
+                <td>
+                    <input type="checkbox" name="new_ip" value="new_packet">
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    MAC Headers
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    src_mac 
+                </td>
+                <td>
+                    <input type="text" name="mac_src" value="00:00:00:00:00:01">
+                </td>
+                <td>
+                    dst_mac 
+                </td>
+                <td>
+                    <input type="text" name="mac_dst" value="00:00:00:00:00:02">
+                </td>
+            </tr>
+
+        </table>
+        <input type="submit" value="Submit">
+    </form>
+    </body>
+</html>
