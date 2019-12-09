@@ -22,6 +22,7 @@ from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet, ipv4, udp
 from ryu.lib.packet import ether_types
 import chardet
+from flownet import FlowNetApi
 
 class SimpleSwitch13(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
@@ -146,26 +147,31 @@ class SimpleSwitch13(app_manager.RyuApp):
 
 
     def _handler_dns(self,datapath,pkt_ethernet,port,pkt_ipv4,pkt_udp,data):
-		ofproto = datapath.ofproto
-		parser = datapath.ofproto_parser
-		pkt_len = len(data)
-		flag = data[42:44]
-		b=chardet.detect(data[42:44])
-		#print(b)
-		if b['encoding'] == None:
-			c=flag.encode("hex")
-		else:
-			flag.decode(b['encoding'])
-			c=flag.encode("hex")
-		id_=int(c,16)
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+        pkt_len = len(data)
+        flag = data[42:44]
+        b=chardet.detect(data[42:44])
+        #print(b)
+        if b['encoding'] == None:
+            c=flag.encode("hex")
+        else:
+            flag.decode(b['encoding'])
+            c=flag.encode("hex")
+        dns_id=int(c,16)
         mac_src = pkt_ethernet.src
         mac_dst = pkt_ethernet.dst
-		ip_src = pkt_ipv4.dst
-		ip_dst = pkt_ipv4.src
-		src_port = pkt_udp.src_port
-		dst_port = pkt_udp.dst_port
+        ip_src = pkt_ipv4.dst
+        ip_dst = pkt_ipv4.src
+        src_port = pkt_udp.src_port
+        dst_port = pkt_udp.dst_port
 
-        if(src_port == 53 or dst_port == 53):
+        if(src_port == 53 or dst_port == 53): 
+            ## DNS Packet
+            if(dst_port==53): #request
+                FlowNetApi.add_request(dns_id, ip_src, ip_dst, mac_src, mac_dst)
+            if(src_port==53): #response
+                FlowNetApi.add_response(dns_id, ip_src, ip_dst, mac_src, mac_dst)
             return True
         
         return False

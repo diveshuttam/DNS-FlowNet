@@ -1,0 +1,5 @@
+pydig
+ryu
+ipaddress
+requests
+dnslib
