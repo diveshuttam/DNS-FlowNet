@@ -55,7 +55,7 @@ class DNSNode(Node):
     def obj(self):
         j = {
             "innerHTML":f"dns_id:{self.dns_id}<br/>type:{self.type}",
-            "collapsed":False,
+            "collapsed":True,
             "children": self.children,
             "HTMLclass": "dns"
         }
@@ -79,7 +79,7 @@ class IPNode(Node):
     def obj(self):
         j = {
             "innerHTML":f"ip_src:{self.ip_src}<br/>ip_dst:{self.ip_dst}",
-            "collapsed":False,
+            "collapsed":True,
             "children":self.children,
             "HTMLclass":"ip"
         }

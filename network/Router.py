@@ -278,8 +278,8 @@ class Router13(app_manager.RyuApp):
         dns_id=int.from_bytes(flag,"big",signed=False)
         mac_src = pkt_ethernet.src
         mac_dst = pkt_ethernet.dst
-        ip_src = pkt_ipv4.dst
-        ip_dst = pkt_ipv4.src
+        ip_src = pkt_ipv4.src
+        ip_dst = pkt_ipv4.dst
         src_port = pkt_udp.src_port
         dst_port = pkt_udp.dst_port
 

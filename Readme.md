@@ -17,8 +17,17 @@ sudo python2 topology_sw.py
 ## run dns server in mininet shell
 h9 sudo python3 ../dns/DnsServer.py h9 &
 
-## create requests on mininet shell
+## create requests on mininet shell or the web
 h1  python3 ../dns/DnsRequest.py h9 "h2"
 
 ## visualize flownet
-open http://localhost:5000/visualize in a browser
+open http://localhost/visualise in a browser 
+
+
+### tempurls
+flownet visualisation
+http://172.24.1.51:5000/visualize
+jupyter notebook
+https://172.24.1.51:8888/tree
+mininet terminal:
+https://172.24.1.51:8888/terminals/4
