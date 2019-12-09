@@ -17,7 +17,7 @@ def add_request(dns_id, ip_src, ip_dst, mac_src, mac_dst):
 
 def add_response(dns_id, ip_src, ip_dst, mac_src, mac_dst):
     d = {
-        "dns_type":"request",
+        "dns_type":"response",
         "dns_id":dns_id,
         "ip_src":ip_src,
         "ip_dst":ip_dst,

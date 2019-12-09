@@ -2,13 +2,16 @@ from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller.handler import CONFIG_DISPATCHER, MAIN_DISPATCHER
 from ryu.controller.handler import set_ev_cls
-from ryu.ofproto import ofproto_v1_3
+from ryu.ofproto import ofproto_v1_3, inet
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
 from ryu.lib.packet import ether_types
 from ryu.lib.packet import arp
 from ryu.lib.packet import icmp
 from ryu.lib.packet import ipv4
+from ryu.lib.packet import udp
+import FlowNetApi
+import chardet
 
 from router_lib import router_mgr
 #initialze the routermgr 
@@ -27,10 +30,29 @@ class Router13(app_manager.RyuApp):
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
+        # install table-miss flow entry
+        #
+        # We specify NO BUFFER to max_len of the output action due to
+        # OVS bug. At this moment, if we specify a lesser number, e.g.,
+        # 128, OVS will send Packet-In with invalid buffer_id and
+        # truncated packet data. In that case, we cannot output packets
+        # correctly.  The bug has been fixed in OVS v2.1.0.
         match = parser.OFPMatch()
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
+
+        # install dns entry for responses
+        match = parser.OFPMatch(eth_type=0x0800, ip_proto=17, udp_src = 53)
+        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+                                          ofproto.OFPCML_NO_BUFFER)]
+        self.add_flow(datapath, 100, match, actions)
+
+        # install dns entry for requests
+        match = parser.OFPMatch(eth_type=0x0800, ip_proto=17, udp_dst = 53)
+        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+                                          ofproto.OFPCML_NO_BUFFER)]
+        self.add_flow(datapath, 100, match, actions)
 
     def add_flow(self, datapath, priority, match, actions, buffer_id=None):
         ofproto = datapath.ofproto
@@ -153,6 +175,17 @@ class Router13(app_manager.RyuApp):
         self.mac_to_port.setdefault(dpid, {})
         self.ip_to_port.setdefault(dpid, {})
 
+        # DNS CHECK for flownet
+        try:
+            pkt_ethernet = eth
+            pkt_ipv4 = pkt.get_protocol(ipv4.ipv4)
+            if pkt_ipv4:
+                if pkt_ipv4.proto == inet.IPPROTO_UDP:
+                    pkt_udp = pkt.get_protocol(udp.udp)
+                    data = msg.data
+                    is_dns_flow = self._handler_dns(datapath,pkt_ethernet,in_port,pkt_ipv4,pkt_udp,data)
+        except BaseException as e:
+            raise
 
         self.logger.info("packet in %s %s %s %s", dpid, src, dst, in_port)
 
@@ -235,3 +268,28 @@ class Router13(app_manager.RyuApp):
                     out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
                                               in_port=in_port, actions=actions, data=data)
                     datapath.send_msg(out)
+    
+    def _handler_dns(self,datapath,pkt_ethernet,port,pkt_ipv4,pkt_udp,data):
+        print("***in handle dns***")
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+        pkt_len = len(data)
+        flag = data[42:44]
+        dns_id=int.from_bytes(flag,"big",signed=False)
+        mac_src = pkt_ethernet.src
+        mac_dst = pkt_ethernet.dst
+        ip_src = pkt_ipv4.dst
+        ip_dst = pkt_ipv4.src
+        src_port = pkt_udp.src_port
+        dst_port = pkt_udp.dst_port
+
+        if(src_port == 53 or dst_port == 53): 
+            ## DNS Packet
+            print("****dns packet ***")
+            if(dst_port==53): #request
+                FlowNetApi.add_request(dns_id, ip_src, ip_dst, mac_src, mac_dst)
+            if(src_port==53): #response
+                FlowNetApi.add_response(dns_id, ip_src, ip_dst, mac_src, mac_dst)
+            return True
+        
+        return False

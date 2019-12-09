@@ -12,8 +12,6 @@ import socketserver
 import struct
 from ip_map import ip_map
 
-server_ip = 'localhost'
-
 try:
     from dnslib import *
 except ImportError:
@@ -118,15 +116,16 @@ class UDPRequestHandler(BaseRequestHandler):
 def main():
     parser = argparse.ArgumentParser(description='Start a DNS implemented in Python.')
     parser = argparse.ArgumentParser(description='Start a DNS implemented in Python. Usually DNSs use UDP on port 53.')
+    parser.add_argument('IP', type=str, help="ip address to bind to")
     parser.add_argument('--port', default=53, type=int, help='The port to listen on.')
     
     args = parser.parse_args()
-
+    
     print("Starting nameserver...")
 
     servers = []
-    servers.append(socketserver.ThreadingUDPServer((f'{server_ip}', args.port), UDPRequestHandler))
-
+    servers.append(socketserver.ThreadingUDPServer((args.IP, args.port), UDPRequestHandler))
+    print(f'binding to {args.IP}:{args.port}')
     for s in servers:
         thread = threading.Thread(target=s.serve_forever)  # that thread will start one more thread for each request
         thread.daemon = True  # exit the server thread when the main thread terminates
