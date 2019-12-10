@@ -161,7 +161,7 @@ class SimpleSwitch13(app_manager.RyuApp):
             ## DNS Packet
             print("***dns packet***")
             pkt_len = len(data)
-            flag = data[42:44]
+            dns_id = data[0:16]
             dns_id = int.from_bytes(flag,"big",signed=False)
             if(dst_port==53): #request
                 FlowNetApi.add_request(dns_id, ip_src, ip_dst, mac_src, mac_dst)
