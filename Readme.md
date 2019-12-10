@@ -21,7 +21,7 @@ h9 sudo python3 ../dns/DnsServer.py h9 &
 h1  python3 ../dns/DnsRequest.py h9 "h2"
 
 ## visualize flownet
-open http://localhost/visualise in a browser 
+open http://localhost:5000/visualise in a browser 
 
 
 ### tempurls
