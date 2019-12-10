@@ -273,9 +273,6 @@ class Router13(app_manager.RyuApp):
         print("***in handle dns***")
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
-        pkt_len = len(data)
-        flag = data[42:44]
-        dns_id=int.from_bytes(flag,"big",signed=False)
         mac_src = pkt_ethernet.src
         mac_dst = pkt_ethernet.dst
         ip_src = pkt_ipv4.src
@@ -283,9 +280,11 @@ class Router13(app_manager.RyuApp):
         src_port = pkt_udp.src_port
         dst_port = pkt_udp.dst_port
 
-        if(src_port == 53 or dst_port == 53): 
+        if(src_port == 53 or dst_port == 53):
             ## DNS Packet
-            print("****dns packet ***")
+            print("***dns packet***")
+            pkt_len = len(data)
+            dns_id = int.from_bytes(data[0:16],"big",signed=False)
             if(dst_port==53): #request
                 FlowNetApi.add_request(dns_id, ip_src, ip_dst, mac_src, mac_dst)
             if(src_port==53): #response
