@@ -22,12 +22,3 @@ h1  python3 ../dns/DnsRequest.py h9 "h2"
 
 ## visualize flownet
 open http://localhost:5000/visualise in a browser 
-
-
-### tempurls
-flownet visualisation
-http://172.24.1.51:5000/visualize
-jupyter notebook
-https://172.24.1.51:8888/tree
-mininet terminal:
-https://172.24.1.51:8888/terminals/4
