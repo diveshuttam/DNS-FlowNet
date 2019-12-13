@@ -10,15 +10,18 @@ cd flownet
 python3 server.py
 
 ## run the mininet
-// this is the onlypart written in python2 as mininet is python2 one
-cd network
-sudo python2 topology_sw.py 
+// this is the onlypart written in python2 as mininet is python2 one  
+cd network  
+sudo python2 topology_sw.py  
+
+## run pingall on minnet shell
+pingall # creates entries in routers 
 
 ## run dns server in mininet shell
-h9 sudo python3 ../dns/DnsServer.py h9 &
+h9 sudo python3 ../dns/DnsServer.py h9 & 
 
 ## create requests on mininet shell or the web
-h1  python3 ../dns/DnsRequest.py h9 "h2"
+h1  python3 ../dns/DnsRequest.py h9 "h2" 
 
 ## visualize flownet
-open http://localhost:5000/visualise in a browser 
+open http://localhost:5000/visualise in a browser  
