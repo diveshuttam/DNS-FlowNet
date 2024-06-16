@@ -1,4 +1,6 @@
-# This is code for my Lab-Oriented Project (LOP) at BITS Pilani
+# DNS-FlowNet
+
+This is code for my Lab-Oriented Project (LOP) at BITS Pilani
 I wish I could have documented this better (PS : As of writing this README It has been 5 years I last touched this). 
 The overall gist was that we wanted to detect DDoS attacks in Software Defined Networks (SDN). THe particular ones we were interested in were DNS flood and DNS amplification attacks. For this we sample requests and track them end to end at APPLICATION, IP, MAC levels (which can be used later to penalize the actor). This particularly seems possible with SDN. 
 This lab project does the tracking part of the requests that flow through a test network created in mininet.
